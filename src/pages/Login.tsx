@@ -8,8 +8,9 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,13 +32,18 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Simulate Google OAuth
-    window.open(
-      `https://accounts.google.com/oauth/authorize?client_id=741230041251-qdqa1ibaujatqs77oi71kv6rj4ap23fa.apps.googleusercontent.com&redirect_uri=${window.location.origin}/auth/callback&response_type=code&scope=email profile`,
-      '_blank',
-      'width=500,height=600'
-    );
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setError('');
+    
+    try {
+      await loginWithGoogle();
+      // Note: The redirect will happen automatically, so we don't navigate here
+    } catch (error: any) {
+      console.error('Google login failed:', error);
+      setError('Google login failed. Please try again.');
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -146,10 +152,11 @@ const Login: React.FC = () => {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full py-3 px-4 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center space-x-2"
+              disabled={googleLoading}
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2"
             >
               <Chrome className="h-5 w-5" />
-              <span>Sign in with Google</span>
+              <span>{googleLoading ? 'Connecting...' : 'Sign in with Google'}</span>
             </button>
           </form>
 

@@ -13,9 +13,12 @@ const Signup: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
-  const { signup } = useAuth();
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+  const { signup, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const availableInterests = [
@@ -43,6 +46,12 @@ const Signup: React.FC = () => {
     setLoading(true);
     setError('');
 
+    if (!agreedToTerms || !agreedToPrivacy) {
+      setError('Please agree to the Terms of Service and Privacy Policy');
+      setLoading(false);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
@@ -69,13 +78,23 @@ const Signup: React.FC = () => {
     }
   };
 
-  const handleGoogleSignup = () => {
-    // Simulate Google OAuth
-    window.open(
-      `https://accounts.google.com/oauth/authorize?client_id=741230041251-qdqa1ibaujatqs77oi71kv6rj4ap23fa.apps.googleusercontent.com&redirect_uri=${window.location.origin}/auth/callback&response_type=code&scope=email profile`,
-      '_blank',
-      'width=500,height=600'
-    );
+  const handleGoogleSignup = async () => {
+    if (!agreedToTerms || !agreedToPrivacy) {
+      setError('Please agree to the Terms of Service and Privacy Policy');
+      return;
+    }
+
+    setGoogleLoading(true);
+    setError('');
+
+    try {
+      await loginWithGoogle();
+      // Note: The redirect will happen automatically, so we don't navigate here
+    } catch (error: any) {
+      console.error('Google signup failed:', error);
+      setError('Google signup failed. Please try again.');
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -211,29 +230,45 @@ const Signup: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                required
-                className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
-              />
-              <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                I agree to the{' '}
-                <Link to="/terms" className="text-pink-600 hover:text-pink-500">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link to="/privacy" className="text-pink-600 hover:text-pink-500">
-                  Privacy Policy
-                </Link>
-              </label>
+            <div className="space-y-3">
+              <div className="flex items-start">
+                <input
+                  id="terms"
+                  name="terms"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded mt-0.5"
+                />
+                <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+                  I agree to the{' '}
+                  <Link to="/terms" target="_blank" className="text-pink-600 hover:text-pink-500 underline">
+                    Terms of Service
+                  </Link>
+                </label>
+              </div>
+
+              <div className="flex items-start">
+                <input
+                  id="privacy"
+                  name="privacy"
+                  type="checkbox"
+                  checked={agreedToPrivacy}
+                  onChange={(e) => setAgreedToPrivacy(e.target.checked)}
+                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded mt-0.5"
+                />
+                <label htmlFor="privacy" className="ml-2 block text-sm text-gray-700">
+                  I agree to the{' '}
+                  <Link to="/privacy" target="_blank" className="text-pink-600 hover:text-pink-500 underline">
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
             </div>
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !agreedToTerms || !agreedToPrivacy}
               className="w-full py-3 px-4 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-semibold hover:from-pink-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
@@ -251,10 +286,11 @@ const Signup: React.FC = () => {
             <button
               type="button"
               onClick={handleGoogleSignup}
-              className="w-full py-3 px-4 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center space-x-2"
+              disabled={googleLoading || !agreedToTerms || !agreedToPrivacy}
+              className="w-full py-3 px-4 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2"
             >
               <Chrome className="h-5 w-5" />
-              <span>Sign up with Google</span>
+              <span>{googleLoading ? 'Connecting...' : 'Sign up with Google'}</span>
             </button>
           </form>
 

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Clock, User, MapPin, ThumbsUp, ThumbsDown, Bookmark, BookmarkCheck, ExternalLink, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
-import { NewsArticle } from '../contexts/NewsContext';
 import { useNews } from '../contexts/NewsContext';
 import { useAuth } from '../contexts/AuthContext';
 
 interface NewsCardProps {
-  article: NewsArticle;
+  article: any;
   showFullContent?: boolean;
 }
 
@@ -33,9 +33,9 @@ const NewsCard: React.FC<NewsCardProps> = ({ article, showFullContent = false })
     return 'Disputed';
   };
 
-  const handleVote = (vote: 'up' | 'down') => {
+  const handleVote = async (vote: 'up' | 'down') => {
     if (!isAuthenticated || hasVoted) return;
-    voteOnArticle(article.id, vote);
+    await voteOnArticle(article.id, vote);
     setHasVoted(true);
   };
 
@@ -89,9 +89,11 @@ const NewsCard: React.FC<NewsCardProps> = ({ article, showFullContent = false })
               <Clock className="h-4 w-4" />
               <span>{formatDate(article.publishedAt)}</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 hover:text-pink-600 transition-colors cursor-pointer">
-              {article.title}
-            </h2>
+            <Link to={`/article/${article.id}`}>
+              <h2 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 hover:text-pink-600 transition-colors cursor-pointer">
+                {article.title}
+              </h2>
+            </Link>
           </div>
           
           {isAuthenticated && (
@@ -124,19 +126,19 @@ const NewsCard: React.FC<NewsCardProps> = ({ article, showFullContent = false })
 
         {/* Read More Button */}
         {!showFullContent && (
-          <button
-            onClick={() => setShowContent(!showContent)}
+          <Link
+            to={`/article/${article.id}`}
             className="text-pink-600 hover:text-pink-700 font-medium text-sm mb-4 flex items-center space-x-1"
           >
-            <span>{showContent ? 'Show Less' : 'Read More'}</span>
+            <span>Read Full Article</span>
             <ExternalLink className="h-4 w-4" />
-          </button>
+          </Link>
         )}
 
         {/* Tags */}
-        {article.tags.length > 0 && (
+        {article.tags && article.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {article.tags.map((tag, index) => (
+            {article.tags.map((tag: string, index: number) => (
               <span
                 key={index}
                 className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs"
@@ -179,7 +181,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ article, showFullContent = false })
                 }`}
               >
                 <ThumbsUp className="h-4 w-4" />
-                <span>{article.votes.upvotes}</span>
+                <span>{article.votes?.upvotes || 0}</span>
               </button>
               <button
                 onClick={() => handleVote('down')}
@@ -191,7 +193,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ article, showFullContent = false })
                 }`}
               >
                 <ThumbsDown className="h-4 w-4" />
-                <span>{article.votes.downvotes}</span>
+                <span>{article.votes?.downvotes || 0}</span>
               </button>
             </div>
           )}

@@ -17,6 +17,7 @@ import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import NotFound from './pages/NotFound';
+import ArticleDetail from './pages/ArticleDetail';
 import Chatbot from './components/Chatbot';
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/voting" element={<Voting />} />
                 <Route path="/saved" element={<Saved />} />
                 <Route path="/categories/:category" element={<Categories />} />
+                <Route path="/article/:id" element={<ArticleDetail />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/privacy" element={<Privacy />} />
