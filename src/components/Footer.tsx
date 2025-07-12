@@ -184,6 +184,31 @@ const Footer: React.FC = () => {
                 </a>
               </div>
             </div>
+
+            <div className="space-y-2">
+              <h5 className="font-medium text-blue-400">Prem Kolte</h5>
+              <p className="text-sm text-gray-300">Full Stack Developer</p>
+              <div className="flex justify-center space-x-2">
+                <a
+                  href="https://www.linkedin.com/in/premkolte/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 text-xs"
+                >
+                  LinkedIn
+                </a>
+                <span className="text-gray-500">•</span>
+                <a
+                  href="https://github.com/Premkolte"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-300 text-xs"
+                >
+                  GitHub
+                </a>
+              </div>
+            </div>
+            
             <div className="space-y-2">
               <h5 className="font-medium text-pink-400">Lakshita Pagaria</h5>
               <p className="text-sm text-gray-300">Python Developer</p>
